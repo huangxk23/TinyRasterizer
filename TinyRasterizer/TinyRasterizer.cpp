@@ -3,53 +3,25 @@
 #include <iostream>
 #include <vector>
 
-//initialize a frame_buf to store the rgb value for img
-//transform the frame_buf into opencv::Mat
-//display the opencv::Mat
+#include "rasterizer.h"
 
-int height, width;
-std::vector<Eigen::Vector3f> frame_buf;
+int height = 500, width = 500;
 
-int main()
+//This function is used to convert the pixels' rgb value into opencv::Mat
+void write_Mat(cv::Mat& img, std::vector<Eigen::Vector3f> frame_buf)
 {
-	std::cin >> height >> width;
-
-	frame_buf.resize(height * width);
-	std::fill(frame_buf.begin(), frame_buf.end(), Eigen::Vector3f(0, 0, 0));
-
-	//initialize the rgb value of the image
-	//1/3 red ,1/3 green ,1/3 blue
-	int step = height / 3;
-	for (int i = 0; i < height; ++i)
-	{
-		for (int j = 0; j < width; ++j)
-		{
-			int idx = i * width + j;
-			if (i < step)
-				frame_buf[idx] = Eigen::Vector3f(255, 0, 0);
-			else if (i < 2 * step)
-				frame_buf[idx] = Eigen::Vector3f(0, 255, 0);
-			else
-				frame_buf[idx] = Eigen::Vector3f(0, 0, 255);
-
-		}
-	}
-
-	//initialize the opencv Mat
-	cv::Mat img = cv::Mat::ones(height, width, CV_8UC3);
-
 	int channels = img.channels(), rows = img.rows, cols = img.cols * channels;
-	//the Mat may be store in a one dimension formation
-	if (img.isContinuous())
-	{
-		cols = rows * cols;
-		rows = 1;
-	}
+	
+	//the Mat may be stored in a one dimension formation
+	//if (img.isContinuous())
+	//{
+	//	cols = rows * cols;
+	//	rows = 1;
+	//}
 
-	//transform the value in frame_buf into Mat
 	uchar* p;
 	int idx = 0;
-	for (int i = 0; i < rows; ++i)
+	for (int i = rows - 1; i >= 0; --i)
 	{
 		p = img.ptr<uchar>(i);
 		for (int j = 0; j < cols; j += 3, idx += 1)
@@ -60,11 +32,30 @@ int main()
 			p[j + 2] = frame_buf[idx].x();
 		}
 	}
-	//std::cout << img << std::endl;
-	cv::imshow("display window", img);
-	int k = cv::waitKey(0);
-	if (k == 'q')
-		return 0;
+}
+
+int main()
+{	
+
+	rasterizer r(height, width);
+
+	while (1)
+	{
+		r.draw_line({ 100,100 }, { 200,350 });
+		
+		//initialize the opencv Mat
+		cv::Mat img = cv::Mat::ones(height, width, CV_8UC3);
+
+		write_Mat(img, r.get_frame_buf());
+
+		cv::imshow("display window", img);
+		int k = cv::waitKey(10);
+		if (k == 'q')
+			break;
+		r.clear();
+	}
+
+	return 0;
 }
 
 
