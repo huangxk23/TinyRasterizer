@@ -3,9 +3,12 @@
 #include <iostream>
 #include <vector>
 
+#include "model.h"
 #include "rasterizer.h"
 
-int height = 500, width = 500;
+int height = 700, width = 700;
+int angle = 0;
+float move = 0;
 
 //This function is used to convert the pixels' rgb value into opencv::Mat
 void write_Mat(cv::Mat& img, std::vector<Eigen::Vector3f> frame_buf)
@@ -33,24 +36,65 @@ void write_Mat(cv::Mat& img, std::vector<Eigen::Vector3f> frame_buf)
 		}
 	}
 }
+enum class projection_type
+{
+	orthographics,perspective
+};
 
 int main()
 {	
+	char obj_path[] = "./model/african_head.obj";
+	Model m(obj_path);
+	//std::cout << m.lx << " " << m.mx << std::endl; std::cout << m.ly << " " << m.my << std::endl; std::cout << m.lz << " " << m.mz << std::endl;
 
-	rasterizer r(height, width);
+	std::cout << "Model Loading Complete!" << std::endl;
 
+	rasterizer r(height, width,&m);
+	
+	projection_type t = projection_type::perspective;
+
+	//parameters of perspective projection:
+	float n, f,aspect_ratio,fov;
+	n = -1, f = -3,aspect_ratio = 1,fov = 90;
+	Eigen::Vector3f camera_pos;
+	camera_pos = { 0,0,2 };
+
+	//parameters of orthographics projection:
+	Eigen::Vector2f lr, tb, fn;
+	lr = { -1,1 }, tb = { -1.5,1.5 }, fn = { -1,1 };
+	
 	while (1)
 	{
-		r.draw_line({ 100,100 }, { 200,350 });
 		
+		switch (t)
+		{
+		case projection_type::orthographics:
+			r.set_model_transformation(angle);
+			r.set_orthographics_transformation(lr,tb,fn);
+			r.set_view_port_transformation();
+			r.render_wire_frame_orthographics_projection();
+			
+			break;
+		case projection_type::perspective:
+			r.set_model_transformation(angle);
+			r.set_camera_transformation(camera_pos.z());
+			r.set_perspective_transformation(n,f,aspect_ratio,fov);
+			r.set_view_port_transformation();
+			r.render_wire_frame_perspective_projection();
+			break;
+		}
 		//initialize the opencv Mat
 		cv::Mat img = cv::Mat::ones(height, width, CV_8UC3);
 
 		write_Mat(img, r.get_frame_buf());
 
 		cv::imshow("display window", img);
-		int k = cv::waitKey(10);
-		if (k == 'q')
+		int k = cv::waitKey(20);
+		if (k == 'a')
+			angle += 20;
+		else if (k == 'd')
+			angle -= 20;
+		else if (k == 'q')
 			break;
 		r.clear();
 	}

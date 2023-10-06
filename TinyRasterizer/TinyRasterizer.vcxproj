@@ -139,10 +139,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="model.cpp" />
     <ClCompile Include="rasterizer.cpp" />
     <ClCompile Include="TinyRasterizer.cpp" />
+    <ClCompile Include="transfomation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="model.h" />
+    <ClInclude Include="transformation.h" />
     <ClInclude Include="rasterizer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
