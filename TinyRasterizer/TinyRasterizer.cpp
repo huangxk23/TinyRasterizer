@@ -2,9 +2,11 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include "model.h"
 #include "rasterizer.h"
+#include "texture.h"
 
 int height = 700, width = 700;
 int angle = 0;
@@ -47,9 +49,11 @@ int main()
 	Model m(obj_path);
 	//std::cout << m.lx << " " << m.mx << std::endl; std::cout << m.ly << " " << m.my << std::endl; std::cout << m.lz << " " << m.mz << std::endl;
 
+	std::string texture_path = "./model/african_head_SSS.jpg";
+	texture tex(texture_path);
 	std::cout << "Model Loading Complete!" << std::endl;
 
-	rasterizer r(height, width,&m);
+	rasterizer r(height, width,&m,&tex);
 	
 	projection_type t = projection_type::perspective;
 
@@ -65,7 +69,7 @@ int main()
 	
 	while (1)
 	{
-		
+		r.clear();
 		switch (t)
 		{
 		case projection_type::orthographics:
@@ -89,14 +93,14 @@ int main()
 		write_Mat(img, r.get_frame_buf());
 
 		cv::imshow("display window", img);
-		int k = cv::waitKey(20);
+		int k = cv::waitKey(0);
 		if (k == 'a')
-			angle += 20;
-		else if (k == 'd')
 			angle -= 20;
+		else if (k == 'd')
+			angle += 20;
 		else if (k == 'q')
 			break;
-		r.clear();
+		
 	}
 
 	return 0;

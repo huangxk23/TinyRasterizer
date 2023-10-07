@@ -17,7 +17,7 @@ private:
 	Eigen::Matrix4f camera_transformation;
 	Eigen::Matrix4f pers_projection;
 	Eigen::Matrix4f ortho_projection;
-	Eigen::Matrix3f view_port_transformation;
+	Eigen::Matrix4f view_port_transformation;
 	
 public:
 	

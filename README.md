@@ -242,10 +242,16 @@ $$
 
 可以看到确实是不能看到整个模型了，只能看到部分模型，虽然模型上面的点是真实存在的并且也是通过正交变化以及view port transformation，不过并不在axis aligned abounding box中的线段经过变换之后会超过屏幕空间坐标的表示范围，也就是最后并不能被看到，因此将view volume理解为可视范围也是ok的。当然得对frame_buf做一个越界判断(直接修改view volume会导致vector越界)
 
-通过model transformation 可以实现简单的绕y轴旋转：按键A和D控制。
+通过model transformation 可以实现简单的绕y轴旋转：按键A和D控制。由于没有visibility的检测，旋转180度看起来和正面是一样的。
 
 ![img](./img/1.gif)
 
 ### 正交投影：
 
 [perspective projection](markdown_files/perspective_projection.md)
+
+----
+
+### 四、图形渲染管线
+
+[graphics pipeline](./markdown_files/graphics pipeline.md)

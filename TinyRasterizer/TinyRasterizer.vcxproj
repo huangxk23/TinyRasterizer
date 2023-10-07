@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model.h" />
+    <ClInclude Include="texture.h" />
     <ClInclude Include="transformation.h" />
     <ClInclude Include="rasterizer.h" />
   </ItemGroup>

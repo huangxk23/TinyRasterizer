@@ -7,7 +7,9 @@ void rasterizer::clear()
 	std::fill(depth_buf.begin(), depth_buf.end(), std::numeric_limits<float>::max());
 }
 
-rasterizer::rasterizer(int h, int w,Model * m) : height(h), width(w),_ptr_m(m)
+
+
+rasterizer::rasterizer(int h, int w,Model * m,texture * t) : height(h), width(w),_ptr_m(m),_ptr_t(t)
 {
 	frame_buf.resize(static_cast<long long>(height) * static_cast<long long>(width));
 	depth_buf.resize(static_cast<long long>(height) * static_cast<long long>(width));
@@ -135,10 +137,10 @@ void rasterizer::render_wire_frame_orthographics_projection()
 	
 	for (int i = 0; i < faces; i++)
 	{
-		std::vector<int> f = _ptr_m->face(i);
-		Eigen::Vector3f vertx1 = _ptr_m->vert(f[0]);
-		Eigen::Vector3f vertx2 = _ptr_m->vert(f[1]);
-		Eigen::Vector3f vertx3 = _ptr_m->vert(f[2]);
+		std::vector<int> f = _ptr_m->get_vertx_idx(i);
+		Eigen::Vector3f vertx1 = _ptr_m->get_vertx(f[0]);
+		Eigen::Vector3f vertx2 = _ptr_m->get_vertx(f[1]);
+		Eigen::Vector3f vertx3 = _ptr_m->get_vertx(f[2]);
 
 		//std::cout << vertx1.x() << " " << vertx1.y() << std::endl;
 		//std::cout << vertx2.x() << " " << vertx2.y() << std::endl;
@@ -163,15 +165,15 @@ void rasterizer::render_wire_frame_orthographics_projection()
 
 void rasterizer::render_wire_frame_perspective_projection()
 {
-	
+	   
 	int faces = _ptr_m->nfaces();
 
 	for (int i = 0; i < faces; i++)
 	{
-		std::vector<int> f = _ptr_m->face(i);
-		Eigen::Vector3f vertx1 = _ptr_m->vert(f[0]);
-		Eigen::Vector3f vertx2 = _ptr_m->vert(f[1]);
-		Eigen::Vector3f vertx3 = _ptr_m->vert(f[2]);
+		std::vector<int> f = _ptr_m->get_vertx_idx(i);
+		Eigen::Vector3f vertx1 = _ptr_m->get_vertx(f[0]);
+		Eigen::Vector3f vertx2 = _ptr_m->get_vertx(f[1]);
+		Eigen::Vector3f vertx3 = _ptr_m->get_vertx(f[2]);
 
 		//std::cout << vertx1.x() << " " << vertx1.y() << std::endl;
 		//std::cout << vertx2.x() << " " << vertx2.y() << std::endl;
@@ -181,9 +183,13 @@ void rasterizer::render_wire_frame_perspective_projection()
 		Eigen::Vector3f s2 = trans.perform_perspective_projection(vertx2);
 		Eigen::Vector3f s3 = trans.perform_perspective_projection(vertx3);
 
+		//std::cout << s1.z() << " " << s2.z() << " " << s3.z() << std::endl;
+
 		Eigen::Vector2i p1((int)s1.x(), (int)s1.y());
 		Eigen::Vector2i p2((int)s2.x(), (int)s2.y());
 		Eigen::Vector2i p3((int)s3.x(), (int)s3.y());
+
+		
 		//std::cout << p1.x() << " " << p1.y() << std::endl;
 		//std::cout << p2.x() << " " << p2.y() << std::endl;
 		//std::cout << p3.x() << " " << p3.y() << std::endl;
@@ -194,6 +200,16 @@ void rasterizer::render_wire_frame_perspective_projection()
 	}
 	
 	
+}
+
+void rasterizer::rasterize_triangles()
+{
+	int triangles = _ptr_m->nfaces();
+	
+	for (int i = 0; i < triangles; i++)
+	{
+		std::vector<int> t = _ptr_m->get_vertx_idx(i);
+	}
 }
 
 void rasterizer::set_model_transformation(int angle)

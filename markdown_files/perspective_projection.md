@@ -2,6 +2,8 @@
 
 ![img](../img/7.PNG)
 
+(图源：虎书)
+
 总体来说就是以上四个变换，一般称为MVP变换，其中view transformation 也被称为camera transformation. Model transformation 以及 viewport transformation 和正交投影并无区别。主要实现camera transformation 以及 projection transfromation.
 
 #### camera transformation
@@ -204,3 +206,21 @@ draw_line(p3, p1);
 可以看到从squeezing之后y的方向确实变了，emmm推导过程中的问题在哪呢？动不了一点脑子了，先搁着吧，直接乘于一个矩阵变回来吧。
 
 ![img](../img/2.gif)
+
+-----
+
+update : 我知道为什么会颠倒过来了！！！！
+
+在写图形渲染管线的时候才忽然发现漏了很重要的一步：homogenius division!
+
+在MVP变换的过程中:
+
+model transformation -> camera transformation -> squeezing -> homogenius division(/w) -> orthographic projection -> viewport transformation
+
+在写图形渲染管线将homogenius division 加上去之后：
+
+![img](../img/12.PNG)
+
+图像又颠倒过来了，我才意识到公式的推导是完全没有问题的！是我漏了一个homogenius division!
+
+![img](../img/3.gif)

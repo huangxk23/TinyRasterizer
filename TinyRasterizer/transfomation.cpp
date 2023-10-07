@@ -51,12 +51,8 @@ void transformation::set_pers_projection(const float & n,const float & f,const f
 		0, 0, 2.0f / (n - f), 0,
 		0, 0, 0, 1;
 
-	M4 << 1, 0, 0, 0,
-		0, -1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1;
 
-	pers_projection = M3 * M2 * M4 * M1;
+	pers_projection = M3 * M2 * M1;
 }
 
 void transformation::set_ortho_projection(const Eigen::Vector2f & lr,const Eigen::Vector2f & tb,const Eigen::Vector2f & nf)
@@ -77,9 +73,10 @@ void transformation::set_ortho_projection(const Eigen::Vector2f & lr,const Eigen
 
 void transformation::set_view_port_transformation(const int & width, const int& height)
 {
-	view_port_transformation << width / 2.0f, 0, (width - 1.0f) / 2.0f,
-		0, height / 2.0f, (height - 1.0f) / 2.0f,
-		0, 0, 1;
+	view_port_transformation << width / 2.0f, 0, 0, (width - 1.0f) / 2.0f,
+		0, height / 2.0f, 0, (height - 1.0f) / 2.0f,
+		0, 0, 1, 0,
+		0, 0, 0, 1;
 }
 
 Eigen::Vector3f transformation::perform_orthographic_projection(const Eigen::Vector3f& vertx)
@@ -93,11 +90,9 @@ Eigen::Vector3f transformation::perform_orthographic_projection(const Eigen::Vec
 
 	//std::cout << canonical_coords.x() << " "<< canonical_coords.y() << std::endl;
 
-	Eigen::Vector3f xy1(canonical_coords.x(), canonical_coords.y(), 1.0f);
+	Eigen::Vector4f screen_coords = view_port_transformation * canonical_coords;
 
-	Eigen::Vector3f screen_coords = view_port_transformation * xy1;
-
-	return screen_coords;
+	return {screen_coords.x(),screen_coords.y(),screen_coords.z()};
 }
 
 Eigen::Vector3f transformation::perform_perspective_projection(const Eigen::Vector3f& vertx)
@@ -107,11 +102,13 @@ Eigen::Vector3f transformation::perform_perspective_projection(const Eigen::Vect
 
 	Eigen::Vector4f canonical_coords = pers_projection * camera_transformation * model_transformation * homo_coords;
 
-	Eigen::Vector3f xy1(canonical_coords.x(), canonical_coords.y(), 1.0f);
+	//homogenius division
+	float w = canonical_coords.w();
+	canonical_coords = canonical_coords / w;
 
-	Eigen::Vector3f screen_coords = view_port_transformation * xy1;
+	Eigen::Vector4f screen_coords = view_port_transformation * canonical_coords;
 
-	return screen_coords;
+	return { screen_coords.x(),screen_coords.y(),screen_coords.z() };
 
 	/*
 	Eigen::Vector4f homo_coords(vertx.x(), vertx.y(), vertx.z(), 1.0f);
