@@ -1,10 +1,12 @@
-### 正交投影的实现：
+### 透视投影的实现：
 
 ![img](../img/7.PNG)
 
 (图源：虎书)
 
 总体来说就是以上四个变换，一般称为MVP变换，其中view transformation 也被称为camera transformation. Model transformation 以及 viewport transformation 和正交投影并无区别。主要实现camera transformation 以及 projection transfromation.
+
+采用右手坐标系。
 
 #### camera transformation
 

@@ -132,15 +132,12 @@ void rasterizer::set_pixel(const Eigen::Vector2i& coords, const Eigen::Vector3f&
 }
 
 void rasterizer::render_wire_frame_orthographics_projection()
-{
-	int faces = _ptr_m->nfaces();
-	
-	for (int i = 0; i < faces; i++)
+{	
+	for (auto triangle : _ptr_m -> triangles_list)
 	{
-		std::vector<int> f = _ptr_m->get_vertx_idx(i);
-		Eigen::Vector3f vertx1 = _ptr_m->get_vertx(f[0]);
-		Eigen::Vector3f vertx2 = _ptr_m->get_vertx(f[1]);
-		Eigen::Vector3f vertx3 = _ptr_m->get_vertx(f[2]);
+		Eigen::Vector3f vertx1 = triangle -> a();
+		Eigen::Vector3f vertx2 = triangle -> b();
+		Eigen::Vector3f vertx3 = triangle -> c();
 
 		//std::cout << vertx1.x() << " " << vertx1.y() << std::endl;
 		//std::cout << vertx2.x() << " " << vertx2.y() << std::endl;
@@ -166,14 +163,14 @@ void rasterizer::render_wire_frame_orthographics_projection()
 void rasterizer::render_wire_frame_perspective_projection()
 {
 	   
-	int faces = _ptr_m->nfaces();
+	
 
-	for (int i = 0; i < faces; i++)
+	for (auto triangle : _ptr_m -> triangles_list)
 	{
-		std::vector<int> f = _ptr_m->get_vertx_idx(i);
-		Eigen::Vector3f vertx1 = _ptr_m->get_vertx(f[0]);
-		Eigen::Vector3f vertx2 = _ptr_m->get_vertx(f[1]);
-		Eigen::Vector3f vertx3 = _ptr_m->get_vertx(f[2]);
+		
+		Eigen::Vector3f vertx1 = triangle->a();
+		Eigen::Vector3f vertx2 = triangle->b();
+		Eigen::Vector3f vertx3 = triangle->c();
 
 		//std::cout << vertx1.x() << " " << vertx1.y() << std::endl;
 		//std::cout << vertx2.x() << " " << vertx2.y() << std::endl;
@@ -204,12 +201,7 @@ void rasterizer::render_wire_frame_perspective_projection()
 
 void rasterizer::rasterize_triangles()
 {
-	int triangles = _ptr_m->nfaces();
 	
-	for (int i = 0; i < triangles; i++)
-	{
-		std::vector<int> t = _ptr_m->get_vertx_idx(i);
-	}
 }
 
 void rasterizer::set_model_transformation(int angle)

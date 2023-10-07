@@ -78,4 +78,4 @@ for triangel in triangles :
 
 ### 5. 通过uv查找rgb value
 
-找一张texture,然后读入为Mat,通过uv进行查找。emmm还得好好修改一下读model的程序来读取uv坐标以及法向量。。
+找一张texture,然后读入为Mat,通过uv进行查找。emmm还得好好修改一下读model的程序来读取uv坐标以及法向量，算了，还是重写一下吧。。

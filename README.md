@@ -246,11 +246,11 @@ $$
 
 ![img](./img/1.gif)
 
-### 正交投影：
+### 透视投影：
 
 [perspective projection](markdown_files/perspective_projection.md)
 
-----
+------
 
 ### 四、图形渲染管线
 
