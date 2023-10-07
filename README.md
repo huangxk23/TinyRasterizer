@@ -254,4 +254,4 @@ $$
 
 ### 四、图形渲染管线
 
-[graphics pipeline](./markdown_files/graphics pipeline.md)
+[graphics pipeline](markdown_files/graphics_pipeline.md)
