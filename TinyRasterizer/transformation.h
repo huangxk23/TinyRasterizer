@@ -29,6 +29,6 @@ public:
 	void set_ortho_projection(const Eigen::Vector2f & lr,const Eigen::Vector2f &tb,const Eigen::Vector2f &nf);
 	void set_view_port_transformation(const int & width,const int & height);
 	Eigen::Vector3f perform_orthographic_projection(const Eigen::Vector3f& vertx);
-	Eigen::Vector3f perform_perspective_projection(const Eigen::Vector3f& vertx);
+	Eigen::Vector4f perform_perspective_projection(const Eigen::Vector3f& vertx);
 
 };

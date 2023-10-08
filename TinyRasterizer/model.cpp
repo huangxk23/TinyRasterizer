@@ -27,17 +27,18 @@ Model::Model(const char* filename) {
             mx = std::max(mx, v.x()); my = std::max(my, v.y()); mz = std::max(mz,v.z());
             Triangle::insert_vertxs(v);
         }
-        else if (!line.compare(0, 4, "vt  "))
+        else if (!line.compare(0, 4, "vt  ") || !line.compare(0,3,"vt "))
         {
+            iss >> trash;
             iss >> trash;
             Eigen::Vector2f uv;
             iss >> uv.x();
             iss >> uv.y();
-            iss >> trash;
             Triangle::insert_uvs(uv);
         }
-        else if (!line.compare(0, 4, "vn  "))
+        else if (!line.compare(0, 4, "vn  ") || !line.compare(0,3,"vn "))
         {
+            iss >> trash;
             iss >> trash;
             Eigen::Vector3f normal;
             iss >> normal.x();

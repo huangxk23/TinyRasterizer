@@ -9,6 +9,7 @@
 #include "model.h"
 #include "texture.h"
 
+
 class rasterizer
 {
 private :
@@ -35,17 +36,20 @@ public:
 	void draw_line_1inf(const Eigen::Vector2i &x0, const Eigen::Vector2i &x1,bool flag);
 	
 	void set_pixel(const Eigen::Vector2i& coords, const Eigen::Vector3f & color);
-	
+	void set_depth(const Eigen::Vector2i& coords, float& depth);
 	void render_wire_frame_orthographics_projection();
 	void render_wire_frame_perspective_projection();
 	
-	void rasterize_triangles();
-	
+	void render();
+	bool inside_triangle(int i,int j, const Eigen::Vector4f& s1, const Eigen::Vector4f& s2, const Eigen::Vector4f& s3);
+	std::array<float, 3> compute_barycentirc(const int& i, const int& j, const Eigen::Vector4f& a, const Eigen::Vector4f& b, const Eigen::Vector4f& c);
+	Eigen::Vector3f texture_map_shader(const float& u, const float& v, texture* t);
+
 	void set_model_transformation(int angle);
 	void set_camera_transformation(const float & pos);
 	void set_orthographics_transformation(const Eigen::Vector2f &lr, const Eigen::Vector2f &tb,const Eigen::Vector2f &nf);
 	void set_perspective_transformation(const float & n,const float & f,const float & aspect_ration,const float & fov);
 	void set_view_port_transformation();
 
-
+	
 };

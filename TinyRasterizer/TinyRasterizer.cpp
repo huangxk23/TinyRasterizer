@@ -49,10 +49,12 @@ int main()
 	Model m(obj_path);
 	//std::cout << m.lx << " " << m.mx << std::endl; std::cout << m.ly << " " << m.my << std::endl; std::cout << m.lz << " " << m.mz << std::endl;
 
-	std::string texture_path = "./model/african_head_SSS.jpg";
+	std::string texture_path = "./model/african_head_diffuse.jpg";
 	texture tex(texture_path);
 	std::cout << "Model Loading Complete!" << std::endl;
-
+	//for (auto uv : Triangle::uvs) std::cout << uv << std::endl;
+	//for (auto normal : Triangle::normals) std::cout << normal << std::endl;
+	//return 0;
 	rasterizer r(height, width,&m,&tex);
 	
 	projection_type t = projection_type::perspective;
@@ -84,7 +86,8 @@ int main()
 			r.set_camera_transformation(camera_pos.z());
 			r.set_perspective_transformation(n,f,aspect_ratio,fov);
 			r.set_view_port_transformation();
-			r.render_wire_frame_perspective_projection();
+			//r.render_wire_frame_perspective_projection();
+			r.render();
 			break;
 		}
 		//initialize the opencv Mat

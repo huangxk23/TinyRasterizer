@@ -16,10 +16,15 @@ public:
 		width = texture_img.rows;
 		height = texture_img.cols;
 	}
-	Eigen::Vector3f  get_color(int u,int v)
+	Eigen::Vector3f  get_color(float u,float v)
 	{
-		auto u_img = u * width;
-		auto v_img = (1 - v) * height;
+		//std::cout << width << " " << height << std::endl;
+		//std::cout << u << " " << v << std::endl;
+		auto u_img = static_cast<int>(u * width) % width;
+		auto v_img = static_cast<int>((1-v) * height) % height;
+		//std::cout << u_img << " " << v_img << std::endl;
+
+		//in opencv function at(): the first index is y while the second index is x; 
 		auto color = texture_img.at<cv::Vec3b>(v_img, u_img);
 		return Eigen::Vector3f(color[2], color[1], color[0]);
 	}

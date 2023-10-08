@@ -41,3 +41,4 @@ public :
 	static void insert_uvs(Eigen::Vector2f& uv);
 
 };
+

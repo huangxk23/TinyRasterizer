@@ -4,7 +4,7 @@
 void rasterizer::clear()
 {
 	std::fill(frame_buf.begin(), frame_buf.end(), Eigen::Vector3f(0, 0, 0));
-	std::fill(depth_buf.begin(), depth_buf.end(), std::numeric_limits<float>::max());
+	std::fill(depth_buf.begin(), depth_buf.end(), std::numeric_limits<float>::lowest());
 }
 
 
@@ -131,6 +131,13 @@ void rasterizer::set_pixel(const Eigen::Vector2i& coords, const Eigen::Vector3f&
 		frame_buf[idx] = color;
 }
 
+void rasterizer::set_depth(const Eigen::Vector2i& coords, float& depth)
+{
+	int idx = coords.y() * width + coords.x();
+	if (idx < height * width && idx >= 0)
+		depth_buf[idx] = depth;
+}
+
 void rasterizer::render_wire_frame_orthographics_projection()
 {	
 	for (auto triangle : _ptr_m -> triangles_list)
@@ -162,8 +169,6 @@ void rasterizer::render_wire_frame_orthographics_projection()
 
 void rasterizer::render_wire_frame_perspective_projection()
 {
-	   
-	
 
 	for (auto triangle : _ptr_m -> triangles_list)
 	{
@@ -176,9 +181,9 @@ void rasterizer::render_wire_frame_perspective_projection()
 		//std::cout << vertx2.x() << " " << vertx2.y() << std::endl;
 		//std::cout << vertx3.x() << " " << vertx3.y() << std::endl;
 
-		Eigen::Vector3f s1 = trans.perform_perspective_projection(vertx1);
-		Eigen::Vector3f s2 = trans.perform_perspective_projection(vertx2);
-		Eigen::Vector3f s3 = trans.perform_perspective_projection(vertx3);
+		Eigen::Vector4f s1 = trans.perform_perspective_projection(vertx1);
+		Eigen::Vector4f s2 = trans.perform_perspective_projection(vertx2);
+		Eigen::Vector4f s3 = trans.perform_perspective_projection(vertx3);
 
 		//std::cout << s1.z() << " " << s2.z() << " " << s3.z() << std::endl;
 
@@ -199,10 +204,103 @@ void rasterizer::render_wire_frame_perspective_projection()
 	
 }
 
-void rasterizer::rasterize_triangles()
+bool rasterizer::inside_triangle(int i,int j,const Eigen::Vector4f & s1,const Eigen::Vector4f & s2,const Eigen::Vector4f & s3)
 {
-	
+	Eigen::Vector3f p1, p2, p3, p;
+	p1 = { s1.x(),s1.y(),0 };
+	p2 = { s2.x(),s2.y(),0 };
+	p3 = { s3.x(),s3.y(),0 };
+	p = { static_cast<float>(i),static_cast<float>(j),0 };
+
+	Eigen::Vector3f cross1 = (p2 - p1).cross(p - p1);
+	Eigen::Vector3f cross2 = (p3 - p2).cross(p - p2);
+	Eigen::Vector3f cross3 = (p1 - p3).cross(p - p3);
+
+	if ((cross1.z() > 0 && cross2.z() > 0 && cross3.z() > 0) || (cross1.z() < 0 && cross2.z() < 0 && cross3.z() < 0)) return true;
+	else return false;
 }
+
+std::array<float, 3> rasterizer::compute_barycentirc(const int& i, const int& j, const Eigen::Vector4f& a, const Eigen::Vector4f& b, const Eigen::Vector4f& c)
+{
+	float alpha = ((j - b.y()) * (c.x() - b.x()) - (i - b.x()) * (c.y() - b.y()))
+		/ ((a.y() - b.y()) * (c.x() - b.x()) - (a.x() - b.x()) * (c.y() - b.y()));
+
+	float beta = ((j - c.y()) * (a.x() - c.x()) - (i - c.x()) * (a.y() - c.y()))
+		/ ((b.y() - c.y()) * (a.x() - c.x()) - (b.x() - c.x()) *(a.y() - c.y()));
+	
+	float gamma = 1 - alpha - beta;
+
+	return { alpha,beta,gamma };
+}
+
+void rasterizer::render()
+{
+	for (auto triangle : _ptr_m->triangles_list)
+	{
+		Eigen::Vector3f vertx1 = triangle->a();
+		Eigen::Vector3f vertx2 = triangle->b();
+		Eigen::Vector3f vertx3 = triangle->c();
+
+		Eigen::Vector4f s1 = trans.perform_perspective_projection(vertx1);
+		Eigen::Vector4f s2 = trans.perform_perspective_projection(vertx2);
+		Eigen::Vector4f s3 = trans.perform_perspective_projection(vertx3);
+
+		float x_min = std::min<float>({ s1.x(),s2.x(),s3.x() });
+		float x_max = std::max<float>({ s1.x(),s2.x(),s3.x() });
+		
+		int x_lower_bound = std::floor(x_min);
+		int x_upper_bound = std::ceil(x_max);
+
+		float y_min = std::min<float>({ s1.y(),s2.y(),s3.y() });
+		float y_max = std::max<float>({ s1.y(),s2.y(),s3.y() });
+
+		int y_lower_bound = std::floor(y_min);
+		int y_upper_bound = std::ceil(y_max);
+
+		for (int i = x_lower_bound; i <= x_upper_bound; i++)
+		{
+			for (int j = y_lower_bound; j <= y_upper_bound; j++)
+			{
+				
+				if (inside_triangle(i,j,s1,s2,s3))
+				{
+					int idx = j * width + i;
+					//interpolate the z value
+					std::array<float,3> a = compute_barycentirc(i, j, s1, s2, s3);
+					float alpha, beta, gamma;
+					alpha = a[0], beta = a[1], gamma = a[2];
+
+					float w = 1.0f / (alpha / s1.w() + beta / s2.w() + gamma / s3.w());
+					float depth = alpha * s1.z() / s1.w() + beta * s2.z() / s2.w() + gamma * s3.z() / s3.w();
+					depth *= w;
+
+					if (depth > depth_buf[idx])
+					{
+						depth_buf[idx] = depth;
+						
+						Eigen::Vector2f uva = triangle->uv_a();
+						Eigen::Vector2f uvb = triangle->uv_b();
+						Eigen::Vector2f uvc = triangle->uv_c();
+						//std::cout << "triangle uvs" << std::endl;
+						//std::cout << uva << " " << uvb << " " << uvc << std::endl;
+						float u = alpha * uva.x() / s1.w() + beta * uvb.x() / s2.w() + gamma * uvc.x() / s3.w();
+						u *= w;
+
+						float v = alpha * uva.y() / s1.w() + beta * uvb.y() / s2.w() + gamma * uvc.y() / s3.w();
+						v *= w;
+						//std::cout << "interpolate uv:" << std::endl;
+						//std::cout << u << " " << v << std::endl;
+						auto color = texture_map_shader(u,v,_ptr_t);
+						
+						set_pixel({i,j},color);
+					}
+				}
+			}
+		}
+	}
+}
+
+
 
 void rasterizer::set_model_transformation(int angle)
 {
@@ -231,3 +329,7 @@ void rasterizer::set_view_port_transformation()
 
 
 
+Eigen::Vector3f rasterizer::texture_map_shader(const float& u, const float & v, texture* t)
+{
+	return t->get_color(u, v);
+}

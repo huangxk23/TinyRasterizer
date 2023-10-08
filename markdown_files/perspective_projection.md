@@ -213,11 +213,11 @@ draw_line(p3, p1);
 
 update : 我知道为什么会颠倒过来了！！！！
 
-在写图形渲染管线的时候才忽然发现漏了很重要的一步：homogenius division!
+在写图形渲染管线的时候才忽然发现漏了很重要的一步：Homogeneous division!
 
 在MVP变换的过程中:
 
-model transformation -> camera transformation -> squeezing -> homogenius division(/w) -> orthographic projection -> viewport transformation
+model transformation -> camera transformation -> squeezing -> homogeneous division(/w) -> orthographic projection -> viewport transformation
 
 在写图形渲染管线将homogenius division 加上去之后：
 

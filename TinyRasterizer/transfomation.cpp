@@ -95,7 +95,9 @@ Eigen::Vector3f transformation::perform_orthographic_projection(const Eigen::Vec
 	return {screen_coords.x(),screen_coords.y(),screen_coords.z()};
 }
 
-Eigen::Vector3f transformation::perform_perspective_projection(const Eigen::Vector3f& vertx)
+//return value : (screen_coords.x(),screen_coords.y(),screen_coords.z(),w) w is used for linear interpolation correction
+
+Eigen::Vector4f transformation::perform_perspective_projection(const Eigen::Vector3f& vertx)
 {
 
 	Eigen::Vector4f homo_coords(vertx.x(), vertx.y(), vertx.z(), 1.0f);
@@ -108,24 +110,7 @@ Eigen::Vector3f transformation::perform_perspective_projection(const Eigen::Vect
 
 	Eigen::Vector4f screen_coords = view_port_transformation * canonical_coords;
 
-	return { screen_coords.x(),screen_coords.y(),screen_coords.z() };
+	return { screen_coords.x(),screen_coords.y(),screen_coords.z(),w};
 
-	/*
-	Eigen::Vector4f homo_coords(vertx.x(), vertx.y(), vertx.z(), 1.0f);
-	std::cout <<"coords in world space:"<<std::endl << homo_coords << std::endl;
-	homo_coords = model_transformation * homo_coords;
-	homo_coords = camera_transformation * homo_coords;
-	std::cout << "coords in camera space:" <<std::endl<< homo_coords << std::endl;
-
-	homo_coords = M1 * homo_coords;
-	std::cout << "coords after squeezing:" << std::endl<<homo_coords << std::endl;
-	homo_coords = M3 * M2 * homo_coords;
-	std::cout << "coords in canonical view volume:" <<std::endl<< homo_coords << std::endl;
-
-	Eigen::Vector3f xy1(homo_coords.x(), homo_coords.y(), 1.0f);
-
-	Eigen::Vector3f screen_coords = view_port_transformation * xy1;
-	std::cout << "coords in screen space:" << std::endl << screen_coords << std::endl;
-	return screen_coords;
-	*/
+	
 }
