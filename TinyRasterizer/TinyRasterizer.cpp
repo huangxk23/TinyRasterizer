@@ -45,11 +45,11 @@ enum class projection_type
 
 int main()
 {	
-	char obj_path[] = "./model/african_head.obj";
+	char obj_path[] = "./model/african head/african_head.obj";
 	Model m(obj_path);
 	//std::cout << m.lx << " " << m.mx << std::endl; std::cout << m.ly << " " << m.my << std::endl; std::cout << m.lz << " " << m.mz << std::endl;
 
-	std::string texture_path = "./model/african_head_diffuse.jpg";
+	std::string texture_path = "./model/african head/african_head_diffuse.jpg";
 	texture tex(texture_path);
 	std::cout << "Model Loading Complete!" << std::endl;
 	//for (auto uv : Triangle::uvs) std::cout << uv << std::endl;
@@ -83,7 +83,7 @@ int main()
 			break;
 		case projection_type::perspective:
 			r.set_model_transformation(angle);
-			r.set_camera_transformation(camera_pos.z());
+			r.set_camera_transformation(camera_pos);
 			r.set_perspective_transformation(n,f,aspect_ratio,fov);
 			r.set_view_port_transformation();
 			//r.render_wire_frame_perspective_projection();
@@ -98,9 +98,9 @@ int main()
 		cv::imshow("display window", img);
 		int k = cv::waitKey(0);
 		if (k == 'a')
-			angle -= 20;
+			angle -= 90;
 		else if (k == 'd')
-			angle += 20;
+			angle += 90;
 		else if (k == 'q')
 			break;
 		

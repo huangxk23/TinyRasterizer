@@ -17,13 +17,13 @@ void transformation::set_model_transformation(int angle)
 	
 }
 
-void transformation::set_camera_transformation(const float & pos)
+void transformation::set_camera_transformation(const Eigen::Vector3f & eye_pos)
 {
 	camera_transformation = Eigen::Matrix4f::Identity();
 	
-	camera_transformation << 1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, -pos,
+	camera_transformation << 1, 0, 0, -eye_pos.x(),
+		0, 1, 0, -eye_pos.y(),
+		0, 0, 1, -eye_pos.z(),
 		0, 0, 0, 1;
 }
 
@@ -97,12 +97,14 @@ Eigen::Vector3f transformation::perform_orthographic_projection(const Eigen::Vec
 
 //return value : (screen_coords.x(),screen_coords.y(),screen_coords.z(),w) w is used for linear interpolation correction
 
-Eigen::Vector4f transformation::perform_perspective_projection(const Eigen::Vector3f& vertx)
+std::pair<Eigen::Vector4f,Eigen::Vector3f> transformation::perform_perspective_projection(const Eigen::Vector3f& vertx)
 {
 
 	Eigen::Vector4f homo_coords(vertx.x(), vertx.y(), vertx.z(), 1.0f);
 
-	Eigen::Vector4f canonical_coords = pers_projection * camera_transformation * model_transformation * homo_coords;
+	Eigen::Vector4f camera_coords = camera_transformation * model_transformation * homo_coords;
+
+	Eigen::Vector4f canonical_coords = pers_projection * camera_coords;
 
 	//homogenius division
 	float w = canonical_coords.w();
@@ -110,7 +112,7 @@ Eigen::Vector4f transformation::perform_perspective_projection(const Eigen::Vect
 
 	Eigen::Vector4f screen_coords = view_port_transformation * canonical_coords;
 
-	return { screen_coords.x(),screen_coords.y(),screen_coords.z(),w};
+	return { { screen_coords.x(),screen_coords.y(),screen_coords.z(),w},{camera_coords.x(),camera_coords.y(),camera_coords.z()} };
 
 	
 }

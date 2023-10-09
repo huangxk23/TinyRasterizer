@@ -255,3 +255,9 @@ $$
 ### 四、图形渲染管线
 
 [graphics pipeline](markdown_files/graphics_pipeline.md)
+
+----
+
+### 五、Blinn Phong Reflectance Model
+
+[Blinn Phong Reflectance Model](markdown_files/Blinn_Phong_Reflectance_Model.md)
