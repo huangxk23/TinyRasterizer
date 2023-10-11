@@ -300,6 +300,8 @@ void rasterizer::render()
 						normal = normal * w;
 						normal = normal.normalized();
 						
+						//the coordinate of the shading point in the camera space
+						//for the reason that camera space does not perform homogeneous division,there is no need to do perspective correct interpolation
 						Eigen::Vector3f camera_coord = alpha * p1.second + beta * p2.second + gamma * p3.second;
 
 						fragment_shader_data data;
@@ -307,6 +309,10 @@ void rasterizer::render()
 						data.t = _ptr_t;
 						data.normal = normal;
 
+						//record the triangle's vertxes
+						data.p1 = p1.second, data.p2 = p2.second, data.p3 = p3.second;
+						data.uv1 = uva, data.uv2 = uvb, data.uv3 = uvc;
+					
 						auto color = blinn_phong_reflectance_shader(&data);
 						
 						set_pixel({i,j},color);
@@ -385,6 +391,80 @@ Eigen::Vector3f rasterizer::blinn_phong_reflectance_shader(fragment_shader_data*
 
 		auto h = (light_direction + view_direction).normalized();
 		auto specular_l = ks.cwiseProduct(light.intensity / r_2) * std::pow(std::max(0.0f, h.dot(normal)), p);
+
+		result_color += ambient_l + diffuse_l + specular_l;
+
+
+	}
+
+	Eigen::Vector3f result = { result_color.x() * color.x() * 255.f,result_color.y() * color.y() * 255.f,result_color.z() * color.z() * 255.f };
+
+	return result;
+}
+
+Eigen::Vector3f rasterizer::normal_mapping_shader(fragment_shader_data* d)
+{
+	Eigen::Vector3f ka = Eigen::Vector3f(0.005, 0.005, 0.005);
+	Eigen::Vector3f kd = Eigen::Vector3f(0.64, 0.64, 0.64);
+	Eigen::Vector3f ks = Eigen::Vector3f(0.7937, 0.7937, 0.7937);
+
+	auto l1 = light{ {20, 20, 20}, {1000, 1000, 1000} };
+	auto l2 = light{ {-20, 20, 0}, {1000, 1000, 1000} };
+
+	std::vector<light> lights = { l1, l2 };
+	Eigen::Vector3f amb_light_intensity{ 10, 10, 10 };
+	Eigen::Vector3f eye_pos{ 0, 0, 0 };
+
+	float p = 150;
+	Eigen::Vector3f color = d->t->get_color(d->uv.x(), d->uv.y()) / 255.0f;
+	Eigen::Vector3f normal = d->normal;
+	Eigen::Vector3f point = d->camera_pos;
+
+	Eigen::Vector3f normal_in_tangent_space = d->t->get_color(d->uv.x(), d->uv.y()) / 255.0f;
+	Eigen::Vector3f I(1,1,1);
+	normal_in_tangent_space = normal_in_tangent_space * 2 - I;
+		
+	Eigen::Vector3f E1 = d->p2 - d->p1;
+	Eigen::Vector3f E2 = d->p3 - d->p1;
+
+	Eigen::Vector2f delta1 = d->uv2 - d->uv1;
+	Eigen::Vector2f delta2 = d->uv3 - d->uv1;
+	
+	float f = 1.0f / (delta1.x() * delta2.y() - delta2.x() * delta1.y());
+
+	Eigen::Vector3f T, B;
+	
+	T.x() = f * (delta2.y() * E1.x() - delta1.y() * E2.x());
+	T.y() = f * (delta2.y() * E1.y() - delta1.y() * E2.y());
+	T.z() = f * (delta2.y() * E1.z() - delta1.y() * E2.z());
+
+	B.x() = f * (delta1.x() * E1.x() - delta2.x() * E2.x());
+	B.y() = f * (delta1.x() * E1.y() - delta2.x() * E2.y());
+	B.z() = f * (delta1.x() * E1.z() - delta2.x() * E2.z());
+
+	Eigen::Matrix3f TBN;
+	TBN << T.x(), B.x(), normal.x(),
+		T.y(), B.y(), normal.y(),
+		T.z(), B.z(), normal.z();
+	Eigen::Vector3f bump_normal = TBN * normal_in_tangent_space;
+	bump_normal = bump_normal.normalized();
+
+	Eigen::Vector3f result_color = { 0, 0, 0 };
+	for (auto& light : lights)
+	{
+
+
+		Eigen::Vector3f light_direction = (light.position - point).normalized();
+		Eigen::Vector3f view_direction = (eye_pos - point).normalized();
+
+		auto r_2 = (light.position - point).squaredNorm();
+
+		auto ambient_l = ka.cwiseProduct(amb_light_intensity);
+
+		auto diffuse_l = kd.cwiseProduct(light.intensity / r_2) * std::max(0.0f, light_direction.dot(bump_normal));
+
+		auto h = (light_direction + view_direction).normalized();
+		auto specular_l = ks.cwiseProduct(light.intensity / r_2) * std::pow(std::max(0.0f, h.dot(bump_normal)), p);
 
 		result_color += ambient_l + diffuse_l + specular_l;
 

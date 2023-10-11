@@ -25,6 +25,10 @@ public:
 	Eigen::Vector2f uv;
 	Eigen::Vector3f normal;
 	Eigen::Vector3f camera_pos;
+
+	Eigen::Vector3f p1, p2, p3;
+	Eigen::Vector2f uv1, uv2, uv3;
+
 };
 
 class rasterizer
@@ -62,6 +66,7 @@ public:
 	std::array<float, 3> compute_barycentirc(const int& i, const int& j, const Eigen::Vector4f& a, const Eigen::Vector4f& b, const Eigen::Vector4f& c);
 	Eigen::Vector3f texture_map_shader(fragment_shader_data * d);
 	Eigen::Vector3f blinn_phong_reflectance_shader(fragment_shader_data* d);
+	Eigen::Vector3f normal_mapping_shader(fragment_shader_data* d);
 
 	void set_model_transformation(int angle);
 	void set_camera_transformation(const Eigen::Vector3f & eye_pos);
