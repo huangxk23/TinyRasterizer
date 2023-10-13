@@ -24,7 +24,7 @@
 
 首先是N的推导，tangent space 中的N(0,0,1)需要转换到object space中的vertex的normal:
 
-$$
+```math
 \begin{bmatrix}
 ? & ? & normal.x()\\
 ? & ? & normal.y()\\
@@ -44,7 +44,7 @@ normal.x()\\
 normal.y()\\
 normal.z()
 \end{bmatrix}
-$$
+```
 
 通过一个特殊值可以求得TBN矩阵中的一列。
 
@@ -68,7 +68,7 @@ $$
 
 期间展开推导不再赘述，结果就是：
 
-$$
+```math
 \begin{bmatrix}
 T_x & T_y & T_z\\
 B_x & B_y & B_z\\
@@ -90,11 +90,11 @@ B_x & B_y & B_z\\
 E_{1x} & E_{1y} & E_{1z}\\
 E_{2x} & E{2y} & E_{2z}\\
 \end{bmatrix}
-$$
+```
 
 和normal 一样：
 
-$$
+```math
 \begin{bmatrix}
 T & ? & N 
 \end{bmatrix}
@@ -102,9 +102,9 @@ T & ? & N
 \begin{bmatrix}
 1\\
 0\\
-1\\
+0\\
 \end{bmatrix} = T
-$$
+```
 
 由此可以求得TBN 矩阵为：
 
