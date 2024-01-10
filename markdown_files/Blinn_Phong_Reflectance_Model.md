@@ -17,7 +17,7 @@ diffuse light 和 eye direction 是没有关系的，因为diffuse light是向�
 specular light:
 
 $$
-I_S = k_s\frac{I}{r^2}\times max(0,l.dot(n))\times max(0,(\frac{l + eye}{|l + eye|}.dot(n)^p))
+I_S = k_s\frac{I}{r^2} \times max(0,(\frac{l + eye}{|l + eye|}.dot(n)^p))
 $$
 
 镜面放射自然是和眼睛看向的方向相关的，因为离光线反射的方向越近，看到的就越亮。
